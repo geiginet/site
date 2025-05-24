@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buying Accounts - Geigi.net</title>
+    <link href="https://fonts.googleapis.com/css?family=Inter:400,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 250px;
+            --primary: #b1001a;
+            --bg: #181a20;
+            --card-bg: #111114;
+            --text: #fff;
+            --muted: #b0b8c1;
+            --success: #2ecc40;
+            --danger: #e74c3c;
+            --contact-btn: #800010;
+            --contact-btn-hover: #a3001a;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+        }
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: width 0.3s, min-width 0.3s;
+            position: relative;
+            min-height: 100vh;
+            box-shadow: 2px 0 10px #0004;
+            z-index: 2;
+            overflow: hidden;
+        }
+        .sidebar.collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            padding: 0;
+            border: none;
+        }
+        .sidebar-header {
+            width: 100%;
+            text-align: center;
+            padding: 1.5em 0 1em 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            letter-spacing: 1px;
+            background: #18181c;
+        }
+        .sidebar.collapsed .sidebar-header,
+        .sidebar.collapsed .profile-pic,
+        .sidebar.collapsed .nav,
+        .sidebar.collapsed .sidebar-social {
+            display: none !important;
+        }
+        .profile-pic {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 1.5em 0 1em 0;
+            border: 3px solid var(--primary);
+            background: #222;
+        }
+        .toggle-btn {
+            position: fixed;
+            top: 32px;
+            left: 18px;
+            width: 36px;
+            height: 36px;
+            background: var(--card-bg);
+            color: var(--primary);
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #0006;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            transition: background 0.2s, left 0.3s;
+        }
+        .toggle-btn:hover {
+            background: #222;
+        }
+        .sidebar:not(.collapsed) + .toggle-btn {
+            left: calc(var(--sidebar-width) - 18px);
+        }
+        .nav {
+            width: 100%;
+            margin-top: 2em;
+            flex: 0 0 auto;
+        }
+        .nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .nav li {
+            margin: 0.5em 0;
+        }
+        .nav a {
+            display: flex;
+            align-items: center;
+            color: var(--text);
+            text-decoration: none;
+            padding: 0.8em 2em;
+            border-radius: 8px 0 0 8px;
+            font-size: 1.1rem;
+            transition: background 0.2s, color 0.2s;
+        }
+        .nav a:hover, .nav a.active {
+            background: var(--primary);
+            color: #fff;
+        }
+        .sidebar-social {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.7em;
+            margin: 2em 0 1em 0;
+        }
+        .social-card {
+            background: var(--card-bg);
+            color: var(--text);
+            border-radius: 8px;
+            padding: 0.7em 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 0.7em;
+            font-size: 1rem;
+            min-width: 120px;
+            box-shadow: 0 2px 8px #0003;
+            transition: background 0.2s;
+        }
+        .social-card img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            display: block;
+        }
+        .social-card:hover {
+            background: #800010;
+        }
+        /* Main content styles */
+        .main-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: var(--bg);
+            padding: 2em 1em;
+        }
+        .big-card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            box-shadow: 0 4px 32px #0007;
+            padding: 2.5em 2em 2em 2em;
+            max-width: 700px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .accounts-header {
+            max-width: 600px;
+            margin: 0 auto 1.5em auto;
+            text-align: center;
+        }
+        .accounts-header h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 0.5em;
+        }
+        .accounts-header p {
+            color: var(--muted);
+            font-size: 1.1rem;
+        }
+        .accounts-list {
+            display: flex;
+            gap: 2em;
+            justify-content: center;
+            margin-bottom: 1.5em;
+            flex-wrap: wrap;
+        }
+        .account-logo-btn {
+            background: var(--card-bg);
+            border: none;
+            border-radius: 16px;
+            padding: 1.2em 1.5em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 2px 12px #0005;
+            transition: background 0.2s, transform 0.2s;
+            min-width: 120px;
+            min-height: 120px;
+            position: relative;
+        }
+        .account-logo-btn:hover {
+            background: #2a1013;
+            transform: translateY(-4px) scale(1.04);
+        }
+        .account-logo-img {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 0.7em;
+            object-fit: contain;
+            background: #222;
+            border-radius: 12px;
+        }
+        .account-type-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+            margin-bottom: 0.2em;
+        }
+        .account-type-row span {
+            color: #fff;
+            font-weight: 600;
+            font-size: 1.08rem;
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.4em;
+            background: var(--success);
+            border: 2px solid #222;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        .status-dot.off {
+            background: var(--danger);
+        }
+        .account-card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            box-shadow: 0 4px 32px #0007;
+            padding: 1.5em 1.2em 1.2em 1.2em;
+            max-width: 350px;
+            width: 100%;
+            margin: 1.5em auto 0 auto;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.3s;
+        }
+        .account-card.active {
+            display: flex;
+        }
+        .account-card .account-logo-img {
+            width: 56px;
+            height: 56px;
+            margin-bottom: 0.7em;
+        }
+        .account-card .account-type-row {
+            margin-bottom: 0.7em;
+        }
+        .account-card .account-desc {
+            color: var(--muted);
+            font-size: 1.05rem;
+            text-align: center;
+            margin-top: 0.5em;
+            margin-bottom: 1.2em;
+        }
+        .contact-btn {
+            background: var(--contact-btn);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.7em 1.5em;
+            font-size: 1.08rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.5em;
+            transition: background 0.2s;
+            box-shadow: 0 2px 8px #0003;
+        }
+        .contact-btn:hover {
+            background: var(--contact-btn-hover);
+        }
+        .legend {
+            margin-top: 2em;
+            color: var(--muted);
+            font-size: 0.98rem;
+            text-align: center;
+        }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 0.3em -2px 0.3em;
+            border: 2px solid #222;
+        }
+        .legend-dot.green { background: var(--success);}
+        .legend-dot.red { background: var(--danger);}
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        @media (max-width: 900px) {
+            .big-card {
+                padding: 1.5em 0.7em 1em 0.7em;
+                margin-top: 1.5em;
+            }
+        }
+        @media (max-width: 700px) {
+            .accounts-list {
+                flex-direction: column;
+                gap: 1.2em;
+                align-items: center;
+            }
+            .account-card {
+                max-width: 98vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="toggle-btn" id="toggleSidebar" title="Toggle sidebar">&lt;</button>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">Geigi.net</div>
+        <img src="Image (54).jpg" alt="Profile" class="profile-pic" id="profilePic">
+        <nav class="nav">
+            <ul>
+                <li><a href="index.html"><span>Home</span></a></li>
+                <li><a href="accounts.html" class="active"><span>Buying Accounts</span></a></li>
+                <li><a href="2fa.html"><span>2FA Generator</span></a></li>
+                <li><a href="2fa.html"><span>Verification</span></a></li>
+                 <li><a href="https://dcserver.dev/"  target="_blank"><span>Discord Server Setups</span></a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-social">
+            <a class="social-card" href="https://discord.com/users/463953200559685632" target="_blank" rel="noopener noreferrer">
+                <img src="discord.png" alt="Discord">
+                @geigi
+            </a>
+            <a class="social-card" href="https://oguser.com/geigi" target="_blank" rel="noopener noreferrer">
+                <img src="Oguserslogo.png" alt="OGU">
+                /geigi
+            </a>
+        </div>
+    </nav>
+    <main class="main-area" id="mainArea">
+        <div class="big-card">
+            <div class="accounts-header">
+                <h1>Buying Accounts</h1>
+                <p>
+                    I buy accounts professionally and offer fair, competitive prices. Click on an account type below to see details. I always pay securely and quickly!
+                </p>
+            </div>
+            <div class="accounts-list">
+                <button class="account-logo-btn" onclick="toggleCard(0)">
+                    <img class="account-logo-img" src="public.png" alt="Type 1">
+                    <div class="account-type-row">
+                        <span class="status-dot" id="status-dot-0" onclick="toggleStatus(event,0)" title="Click to toggle status"></span>
+                        <span>Minecraft</span>
+                    </div>
+                </button>
+                <button class="account-logo-btn" onclick="toggleCard(1)">
+                    <img class="account-logo-img" src="discord.png" alt="Type 2">
+                    <div class="account-type-row">
+                        <span class="status-dot" id="status-dot-1" onclick="toggleStatus(event,1)" title="Click to toggle status"></span>
+                        <span>Discord</span>
+                    </div>
+                </button>
+                <button class="account-logo-btn" onclick="toggleCard(2)">
+                    <img class="account-logo-img" src="more-142.png" alt="Type 3">
+                    <div class="account-type-row">
+                        <span class="status-dot" id="status-dot-2" onclick="toggleStatus(event,2)" title="Click to toggle status"></span>
+                        <span>Others</span>
+                    </div>
+                </button>
+            </div>
+            <div id="account-card-0" class="account-card">
+                <img class="account-logo-img" src="public.png" alt="Minecraft">
+                <div class="account-type-row">
+                    <span class="status-dot" id="status-dot-card-0"></span>
+                    <span style="font-weight:bold; color:#fff;">Minecraft</span>
+                </div>
+                <div class="account-desc" id="desc-0">Currently buying quicksell: <br><br>
+
+Semis <br>
+3 chars <br>
+3 Letters <br>
+Repeaters <br>
+and Minecons! <br></div>
+                <a class="contact-btn" href="https://discord.com/users/463953200559685632" target="_blank" rel="noopener noreferrer">Contact Me!</a>
+            </div>
+            <div id="account-card-1" class="account-card">
+                <img class="account-logo-img" src="discord.png" alt="Discord">
+                <div class="account-type-row">
+                    <span class="status-dot off" id="status-dot-card-1"></span>
+                    <span style="font-weight:bold; color:#fff;">Discord</span>
+                </div>
+                <div class="account-desc" id="desc-1">Currently buying quicksell: <br><br>
+
+Semis <br>
+3 chars <br>
+3 Letters <br>
+Repeaters <br>
+and OG's! <br></div>
+                <a class="contact-btn" href="https://discord.com/users/463953200559685632" target="_blank" rel="noopener noreferrer">Contact Me!</a>
+            </div>
+            <div id="account-card-2" class="account-card">
+                <img class="account-logo-img" src="more-142.png" alt="Type 3">
+                <div class="account-type-row">
+                    <span class="status-dot" id="status-dot-card-2"></span>
+                    <span style="font-weight:bold; color:#fff;">Others</span>
+                </div>
+                <div class="account-desc" id="desc-2">Currently buying quicksell: <br><br>
+
+Clash of Clans Accounts <br>
+OGUser.com Credits (0.85$/1K) <br>
+Chess.com Accounts <br>
+and others! <br></div>
+                <a class="contact-btn" href="https://discord.com/users/463953200559685632" target="_blank" rel="noopener noreferrer">Contact Me!</a>
+            </div>
+            <div class="legend">
+                <div>
+                    <span class="legend-dot green"></span> Buying &nbsp;&nbsp;
+                    <span class="legend-dot red"></span> Not buying
+                </div>
+                <div style="margin-top:0.5em;">
+                    <b>Legend:</b> Green means I am currently buying this type. Red means I am not buying right now.<br>
+                    Click the dot to toggle status.
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        // Sidebar Toggle
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('toggleSidebar');
+        let collapsed = false;
+        toggleBtn.addEventListener('click', function() {
+            collapsed = !collapsed;
+            sidebar.classList.toggle('collapsed', collapsed);
+            toggleBtn.innerHTML = collapsed ? '&gt;' : '&lt;';
+        });
+
+        // Toggle account card
+        function toggleCard(idx) {
+            for (let i = 0; i < 3; i++) {
+                document.getElementById('account-card-' + i).classList.toggle('active', i === idx);
+                // Sync status dot in card with main dot
+                const mainDot = document.getElementById('status-dot-' + i);
+                const cardDot = document.getElementById('status-dot-card-' + i);
+                if (mainDot && cardDot) {
+                    cardDot.className = mainDot.className;
+                }
+            }
+        }
+        // Toggle status dot color
+        function toggleStatus(e, idx) {
+            e.stopPropagation();
+            const dot = document.getElementById('status-dot-' + idx);
+            dot.classList.toggle('off');
+            // Sync card dot if card is open
+            const cardDot = document.getElementById('status-dot-card-' + idx);
+            if (cardDot) {
+                cardDot.className = dot.className;
+            }
+        }
+    </script>
+</body>
+</html>
