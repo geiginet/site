@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2FA Generator - Geigi.net</title>
+    <link href="https://fonts.googleapis.com/css?family=Inter:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/translucent.css"/>
+    <style>
+        :root {
+            --sidebar-width: 250px;
+            --primary: #b1001a;
+            --bg: #181a20;
+            --card-bg: #111114;
+            --text: #fff;
+            --muted: #b0b8c1;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', Arial, sans-serif;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: width 0.3s, min-width 0.3s;
+            position: relative;
+            min-height: 100vh;
+            box-shadow: 2px 0 10px #0004;
+            z-index: 2;
+            overflow: hidden;
+        }
+        .sidebar.collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            padding: 0;
+            border: none;
+        }
+        .sidebar-header {
+            width: 100%;
+            text-align: center;
+            padding: 1.5em 0 1em 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            letter-spacing: 1px;
+            background: #18181c;
+        }
+        .sidebar.collapsed .sidebar-header,
+        .sidebar.collapsed .profile-pic,
+        .sidebar.collapsed .nav,
+        .sidebar.collapsed .sidebar-social {
+            display: none !important;
+        }
+        .profile-pic {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 1.5em 0 1em 0;
+            border: 3px solid var(--primary);
+            background: #222;
+        }
+        .toggle-btn {
+            position: fixed;
+            top: 32px;
+            left: 18px;
+            width: 36px;
+            height: 36px;
+            background: var(--card-bg);
+            color: var(--primary);
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #0006;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            transition: background 0.2s, left 0.3s;
+        }
+        .toggle-btn:hover {
+            background: #222;
+        }
+        .sidebar:not(.collapsed) + .toggle-btn {
+            left: calc(var(--sidebar-width) - 18px);
+        }
+        .nav {
+            width: 100%;
+            margin-top: 2em;
+            flex: 0 0 auto;
+        }
+        .nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .nav li {
+            margin: 0.5em 0;
+        }
+        .nav a {
+            display: flex;
+            align-items: center;
+            color: var(--text);
+            text-decoration: none;
+            padding: 0.8em 2em;
+            border-radius: 8px 0 0 8px;
+            font-size: 1.1rem;
+            transition: background 0.2s, color 0.2s;
+        }
+        .nav a:hover, .nav a.active {
+            background: var(--primary);
+            color: #fff;
+        }
+        .sidebar-social {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.7em;
+            margin: 2em 0 1em 0;
+        }
+        .social-card {
+            background: var(--card-bg);
+            color: var(--text);
+            border-radius: 8px;
+            padding: 0.7em 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 0.7em;
+            font-size: 1rem;
+            min-width: 120px;
+            box-shadow: 0 2px 8px #0003;
+            transition: background 0.2s;
+        }
+        .social-card img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            display: block;
+        }
+        .social-card:hover {
+            background: #800010;
+        }
+        .main-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: var(--bg);
+            padding: 2em 1em;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .twofa-card {
+            background: #111114;
+            border-radius: 18px;
+            box-shadow: 0 4px 32px #0007;
+            padding: 2.5em 2em 2.2em 2em;
+            max-width: 400px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 520px;
+            position: relative;
+        }
+        .twofa-card h1 {
+            color: #b1001a;
+            font-size: 2rem;
+            margin-bottom: 1.1em;
+            margin-top: 0.2em;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+        .twofa-desc {
+            width: 100%;
+            margin-bottom: 2.1em;
+            text-align: center;
+        }
+        .desc-title {
+            color: #fff;
+            font-size: 1.18rem;
+            font-weight: 600;
+            margin-bottom: 0.25em;
+            letter-spacing: 0.1px;
+        }
+        .desc-sub {
+            color: var(--muted);
+            font-size: 1.03rem;
+            font-weight: 400;
+            margin-bottom: 0.1em;
+        }
+        .secret-input {
+            width: 100%;
+            padding: 0.8em;
+            border-radius: 8px;
+            border: none;
+            background: #23262f;
+            color: #fff;
+            font-size: 1.1rem;
+            margin-bottom: 2.2em;
+            margin-top: 0.1em;
+            box-sizing: border-box;
+            text-align: center;
+            letter-spacing: 0.08em;
+        }
+        #codeSection {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 2.8em;
+            margin-top: 0.2em;
+            transition: margin-bottom 0.2s;
+        }
+        .code-box {
+            background: #23262f;
+            color: #fff;
+            font-size: 2.2rem;
+            font-family: 'Consolas', monospace;
+            padding: 0.6em 0.5em;
+            border-radius: 10px;
+            margin-bottom: 0.7em;
+            margin-top: 0.5em;
+            cursor: pointer;
+            user-select: all;
+            transition: background 0.2s;
+            position: relative;
+            text-align: center;
+            width: 100%;
+            max-width: 220px;
+            box-sizing: border-box;
+            opacity: 1;
+            letter-spacing: 0.18em;
+        }
+        .code-box.inactive {
+            opacity: 0.5;
+        }
+        .code-box.copied {
+            background: #1e7a34;
+        }
+        .timer {
+            color: #b0b8c1;
+            font-size: 1.1rem;
+            margin-bottom: 0.2em;
+            margin-top: -0.2em;
+            text-align: center;
+            letter-spacing: 0.04em;
+        }
+        .error {
+            color: #e74c3c;
+            margin-top: 0.5em;
+            font-size: 1rem;
+            min-height: 1.2em;
+            text-align: center;
+        }
+        .footer {
+            margin-top: auto;
+            color: var(--muted);
+            font-size: 0.98rem;
+            text-align: center;
+            width: 100%;
+            padding-top: 1.5em;
+            border-top: 1px solid #23262f;
+            box-sizing: border-box;
+        }
+        .footer-note {
+            margin-bottom: 0.3em;
+            color: #b0b8c1;
+            font-size: 0.99rem;
+        }
+        @media (max-width: 700px) {
+            .twofa-card {
+                padding: 1.5em 0.7em 1em 0.7em;
+                min-height: 420px;
+            }
+            .footer {
+                padding-top: 1em;
+            }
+        }
+    </style>
+    <!-- jsSHA for SHA-1 HMAC -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/2.4.2/sha.js"></script>
+    <!-- Tippy.js for tooltip -->
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+</head>
+<body>
+    <button class="toggle-btn" id="toggleSidebar" title="Toggle sidebar">&lt;</button>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">Geigi.net</div>
+        <img src="Image (54).jpg" alt="Profile" class="profile-pic" id="profilePic">
+        <nav class="nav">
+            <ul>
+                <li><a href="index.html"><span>Home</span></a></li>
+                <li><a href="accounts.html"><span>Buying Accounts</span></a></li>
+                <li><a href="2fa.html" class="active"><span>2FA Generator</span></a></li>
+                <li><a href="verify.html"><span>Verification</span></a></li>
+                 <li><a href="https://dcserver.dev/"  target="_blank"><span>Discord Server Setups</span></a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-social">
+            <a class="social-card" href="https://discord.com/users/463953200559685632" target="_blank" rel="noopener noreferrer">
+                <img src="discord.png" alt="Discord">
+                @geigi
+            </a>
+            <a class="social-card" href="https://oguser.com/geigi" target="_blank" rel="noopener noreferrer">
+                <img src="Oguserslogo.png" alt="OGU">
+                /geigi
+            </a>
+        </div>
+    </nav>
+    <main class="main-area" id="mainArea">
+        <div class="twofa-card">
+            <h1>2FA Code Generator</h1>
+            <div class="twofa-desc">
+                <div class="desc-title">Easily generate your 2FA codes.</div>
+                <div class="desc-sub">Paste your 2FA Secret below!</div>
+            </div>
+            <input type="text" id="secret" placeholder="Enter your TOTP secret here..." autocomplete="off" spellcheck="false" class="secret-input">
+            <div id="codeSection">
+                <input id="otp" class="code-box inactive" value="000000" readonly title="Click to copy">
+                <div class="timer" id="timer">Expires in 30s</div>
+            </div>
+            <div class="error" id="error"></div>
+            <div class="footer">
+                <div class="footer-note"><b>Note:</b> Your secret never leaves your browser.</div>
+                Codes refresh every 30 seconds. Click the code to copy!
+            </div>
+        </div>
+    </main>
+    <script>
+        // Sidebar Toggle
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('toggleSidebar');
+        let collapsed = false;
+        toggleBtn.addEventListener('click', function() {
+            collapsed = !collapsed;
+            sidebar.classList.toggle('collapsed', collapsed);
+            toggleBtn.innerHTML = collapsed ? '&gt;' : '&lt;';
+        });
+
+        // 2FA JS
+        const secret = document.getElementById('secret');
+        var secretKey = "";
+        var currentOtp = 0;
+
+        function leftpad(str, len, pad) {
+            if (len + 1 >= str.length) {
+                str = Array(len + 1 - str.length).join(pad) + str;
+            }
+            return str;
+        }
+
+        function dec2hex(s) { return (s < 15.5 ? '0' : '') + Math.round(s).toString(16); }
+        function hex2dec(s) { return parseInt(s, 16); }
+
+        function base32tohex(base32) {
+            var base32chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+            var bits = "";
+            var hex = "";
+
+            for (var i = 0; i < base32.length; i++) {
+                var val = base32chars.indexOf(base32.charAt(i).toUpperCase());
+                bits += leftpad(val.toString(2), 5, '0');
+            }
+
+            for (var i = 0; i + 4 <= bits.length; i += 4) {
+                var chunk = bits.substr(i, 4);
+                hex = hex + parseInt(chunk, 2).toString(16);
+            }
+            return hex;
+        }
+
+        function updateOtp() {
+            const otpInput = document.getElementById('otp');
+            if (secretKey.length >= 16 && secretKey.length <= 40) {
+                try {
+                    var key = base32tohex(secretKey);
+                    var epoch = Math.round(new Date().getTime() / 1000);
+                    var time = leftpad(dec2hex(Math.floor(epoch / 30)), 16, '0');
+
+                    var shaObj = new jsSHA("SHA-1", "HEX");
+                    shaObj.setHMACKey(key, "HEX");
+                    shaObj.update(time);
+                    var hmac = shaObj.getHMAC("HEX");
+                    var offset = hex2dec(hmac.substring(hmac.length - 1));
+
+                    var otp = (hex2dec(hmac.substr(offset * 2, 8)) & hex2dec('7fffffff')) + '';
+                    otp = otp.substring(otp.length - 6);
+
+                    currentOtp = otp;
+                    otpInput.value = otp;
+                    otpInput.classList.remove('inactive');
+                    document.getElementById('error').textContent = "";
+                } catch {
+                    currentOtp = 0;
+                    otpInput.value = "000000";
+                    otpInput.classList.add('inactive');
+                    document.getElementById('error').textContent = "Invalid secret!";
+                }
+            } else {
+                currentOtp = 0;
+                otpInput.value = "000000";
+                otpInput.classList.add('inactive');
+                document.getElementById('error').textContent = "";
+            }
+        }
+
+        function timer() {
+            const otpInput = document.getElementById('otp');
+            if (currentOtp != 0) {
+                var epoch = Math.round(new Date().getTime() / 1000);
+                var countDown = 30 - (epoch % 30);
+                if (epoch % 30 == 0) updateOtp();
+                document.getElementById('timer').innerHTML = "Expires in " + countDown + "s";
+            } else {
+                document.getElementById('timer').innerHTML = "Expires in 30s";
+            }
+        }
+
+        secret.addEventListener('input', function () {
+            secretKey = secret.value.replace(/ /g, '');
+            updateOtp();
+            if (secretKey.length == 0) {
+                document.getElementById('timer').innerHTML = "Expires in 30s";
+                currentOtp = 0;
+                document.getElementById('otp').value = "000000";
+                document.getElementById('otp').classList.add('inactive');
+                document.getElementById('error').textContent = "";
+            }
+        });
+
+        function fallbackCopyTextToClipboard(text) {
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                // ignore
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        function copyTextToClipboard(text) {
+            if (!navigator.clipboard) {
+                fallbackCopyTextToClipboard(text);
+                return;
+            }
+            navigator.clipboard.writeText(text);
+        }
+
+        document.getElementById('otp').addEventListener('click', () => {
+            copyTextToClipboard(currentOtp == 0 ? "000000" : currentOtp);
+        });
+
+        tippy('#otp', {
+            content: "Copied!",
+            trigger: 'click',
+            animation: 'shift-away',
+            hideOnClick: false,
+            theme: 'translucent',
+            offset:[0,-27.5],
+            onShow(instance) {
+                setTimeout(() => {
+                    instance.hide();
+                }, 500);
+            }
+        });
+
+        setInterval(timer, 1000);
+
+        // Autofocus input
+        secret.focus();
+    </script>
+</body>
+</html>

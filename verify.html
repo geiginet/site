@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Discord Verification - Geigi.net</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Inter:400,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 250px;
+            --primary: #b1001a;
+            --bg: #181a20;
+            --card-bg: #111114;
+            --text: #fff;
+            --muted: #b0b8c1;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', Arial, sans-serif;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: width 0.3s, min-width 0.3s;
+            position: relative;
+            min-height: 100vh;
+            box-shadow: 2px 0 10px #0004;
+            z-index: 2;
+            overflow: hidden;
+        }
+        .sidebar.collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            padding: 0;
+            border: none;
+        }
+        .sidebar-header {
+            width: 100%;
+            text-align: center;
+            padding: 1.5em 0 1em 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            letter-spacing: 1px;
+            background: #18181c;
+        }
+        .sidebar.collapsed .sidebar-header,
+        .sidebar.collapsed .profile-pic,
+        .sidebar.collapsed .nav,
+        .sidebar.collapsed .sidebar-social {
+            display: none !important;
+        }
+        .profile-pic {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 1.5em 0 1em 0;
+            border: 3px solid var(--primary);
+            background: #222;
+        }
+        .toggle-btn {
+            position: fixed;
+            top: 32px;
+            left: 18px;
+            width: 36px;
+            height: 36px;
+            background: var(--card-bg);
+            color: var(--primary);
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #0006;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            transition: background 0.2s, left 0.3s;
+        }
+        .toggle-btn:hover {
+            background: #222;
+        }
+        .sidebar:not(.collapsed) + .toggle-btn {
+            left: calc(var(--sidebar-width) - 18px);
+        }
+        .nav {
+            width: 100%;
+            margin-top: 2em;
+            flex: 0 0 auto;
+        }
+        .nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .nav li {
+            margin: 0.5em 0;
+        }
+        .nav a {
+            display: flex;
+            align-items: center;
+            color: var(--text);
+            text-decoration: none;
+            padding: 0.8em 2em;
+            border-radius: 8px 0 0 8px;
+            font-size: 1.1rem;
+            transition: background 0.2s, color 0.2s;
+        }
+        .nav a:hover, .nav a.active {
+            background: var(--primary);
+            color: #fff;
+        }
+        .sidebar-social {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.7em;
+            margin: 2em 0 1em 0;
+        }
+        .social-card {
+            background: var(--card-bg);
+            color: var(--text);
+            border-radius: 8px;
+            padding: 0.7em 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 0.7em;
+            font-size: 1rem;
+            min-width: 120px;
+            box-shadow: 0 2px 8px #0003;
+            transition: background 0.2s;
+        }
+        .social-card img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            display: block;
+        }
+        .social-card:hover {
+            background: #800010;
+        }
+        .main-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: var(--bg);
+            padding: 2em 1em;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .verify-card {
+            background: #111114;
+            border-radius: 18px;
+            box-shadow: 0 4px 32px #0007;
+            padding: 2.5em 2em 2em 2em;
+            max-width: 400px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #b1001a;
+            font-size: 2rem;
+            margin-bottom: 0.7em;
+        }
+        .instructions {
+            color: #b0b8c1;
+            font-size: 1.05rem;
+            margin-bottom: 1.5em;
+            text-align: left;
+            width: 100%;
+        }
+        .instructions ul {
+            margin: 0.5em 0 1em 1.2em;
+            padding: 0;
+        }
+        .instructions li {
+            margin-bottom: 0.4em;
+        }
+        .verify-input {
+            width: 100%;
+            padding: 0.8em;
+            border-radius: 8px;
+            border: none;
+            background: #23262f;
+            color: #fff;
+            font-size: 1.1rem;
+            margin-bottom: 1.2em;
+            margin-top: 0.2em;
+            text-align: center;
+            letter-spacing: 0.04em;
+        }
+        .verify-btn {
+            width: 100%;
+            padding: 0.8em;
+            border-radius: 8px;
+            border: none;
+            background: #b1001a;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 1.2em;
+            transition: background 0.2s;
+        }
+        .verify-btn:hover {
+            background: #800010;
+        }
+        .result {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 0.5em;
+            min-height: 1.5em;
+            text-align: center;
+        }
+        .result.success {
+            color: #1ed760;
+        }
+        .result.fail {
+            color: #e74c3c;
+        }
+        @media (max-width: 700px) {
+            .verify-card {
+                padding: 1.5em 0.7em 1em 0.7em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="toggle-btn" id="toggleSidebar" title="Toggle sidebar">&lt;</button>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">Geigi.net</div>
+        <img src="Image (54).jpg" alt="Profile" class="profile-pic" id="profilePic">
+        <nav class="nav">
+            <ul>
+                <li><a href="index.html"><span>Home</span></a></li>
+                <li><a href="accounts.html"><span>Buying Accounts</span></a></li>
+                <li><a href="2fa.html"><span>2FA Generator</span></a></li>
+                <li><a href="verify.html" class="active"><span>Verification</span></a></li>
+                 <li><a href="https://dcserver.dev/"  target="_blank"><span>Discord Server Setups</span></a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-social">
+            <a class="social-card" href="https://discord.com/users/463953200559685632" target="_blank" rel="noopener noreferrer">
+                <img src="discord.png" alt="Discord">
+                @geigi
+            </a>
+            <a class="social-card" href="https://oguser.com/geigi" target="_blank" rel="noopener noreferrer">
+                <img src="Oguserslogo.png" alt="OGU">
+                /geigi
+            </a>
+        </div>
+    </nav>
+    <main class="main-area">
+        <div class="verify-card">
+            <h1>Discord Verification</h1>
+            <div class="instructions">
+                <b>How to Verify You're Talking to me on Discord</b>
+                <ul>
+                    <li>Open Discord and enable <b>Developer Mode</b> (Settings &gt; Advanced).</li>
+                    <li>Right-click the user's name and select <b>Copy ID</b>.</li>
+                    <li>Paste the User ID below and click <b>Verify</b>.</li>
+                </ul>
+                If the verification says "<b>Matching, you're dealing with me!</b>" — you’ve confirmed it’s truly me.
+            </div>
+            <input type="text" id="verifyInput" class="verify-input" placeholder="Paste Discord User ID here">
+            <button class="verify-btn" id="verifyBtn">Verify</button>
+            <div class="result" id="result"></div>
+        </div>
+    </main>
+    <script>
+        // Sidebar Toggle
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('toggleSidebar');
+        let collapsed = false;
+        toggleBtn.addEventListener('click', function() {
+            collapsed = !collapsed;
+            sidebar.classList.toggle('collapsed', collapsed);
+            toggleBtn.innerHTML = collapsed ? '&gt;' : '&lt;';
+        });
+
+ 
+        const REAL_USER_ID = "463953200559685632"; // 
+
+        const input = document.getElementById('verifyInput');
+        const btn = document.getElementById('verifyBtn');
+        const result = document.getElementById('result');
+
+        btn.addEventListener('click', function() {
+            const val = input.value.trim();
+            if (!val) {
+                result.textContent = "";
+                result.className = "result";
+                return;
+            }
+            if (val === REAL_USER_ID) {
+                result.textContent = "✅ You're dealing with the real Geigi!";
+                result.className = "result success";
+            } else {
+                result.textContent = "❌ Not matching, likely an impersonator.";
+                result.className = "result fail";
+            }
+        });
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === "Enter") btn.click();
+        });
+    </script>
+</body>
+</html>

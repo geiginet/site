@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geigi.net</title>
+    <link href="https://fonts.googleapis.com/css?family=Inter:400,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 250px;
+            --primary: #b1001a;
+            --bg: #181a20;
+            --card-bg: #111114;
+            --text: #fff;
+            --muted: #b0b8c1;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+        }
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: width 0.3s, min-width 0.3s;
+            position: relative;
+            min-height: 100vh;
+            box-shadow: 2px 0 10px #0004;
+            z-index: 2;
+            overflow: hidden;
+        }
+        .sidebar.collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            padding: 0;
+            border: none;
+        }
+        .sidebar-header {
+            width: 100%;
+            text-align: center;
+            padding: 1.5em 0 1em 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            letter-spacing: 1px;
+            background: #18181c;
+        }
+        .sidebar.collapsed .sidebar-header,
+        .sidebar.collapsed .profile-pic,
+        .sidebar.collapsed .nav,
+        .sidebar.collapsed .sidebar-social {
+            display: none !important;
+        }
+        .profile-pic {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 1.5em 0 1em 0;
+            border: 3px solid var(--primary);
+            background: #222;
+        }
+        .toggle-btn {
+            position: fixed;
+            top: 32px;
+            left: 18px;
+            width: 36px;
+            height: 36px;
+            background: var(--card-bg);
+            color: var(--primary);
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #0006;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            transition: background 0.2s, left 0.3s;
+        }
+        .toggle-btn:hover {
+            background: #222;
+        }
+        .sidebar:not(.collapsed) + .toggle-btn {
+            left: calc(var(--sidebar-width) - 18px);
+        }
+        .nav {
+            width: 100%;
+            margin-top: 2em;
+            flex: 0 0 auto;
+        }
+        .nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .nav li {
+            margin: 0.5em 0;
+        }
+        .nav a {
+            display: flex;
+            align-items: center;
+            color: var(--text);
+            text-decoration: none;
+            padding: 0.8em 2em;
+            border-radius: 8px 0 0 8px;
+            font-size: 1.1rem;
+            transition: background 0.2s, color 0.2s;
+        }
+        .nav a:hover, .nav a.active {
+            background: var(--primary);
+            color: #fff;
+        }
+        .sidebar-social {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.7em;
+            margin: 2em 0 1em 0;
+        }
+        .social-card {
+            background: var(--card-bg);
+            color: var(--text);
+            border-radius: 8px;
+            padding: 0.7em 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 0.7em;
+            font-size: 1rem;
+            min-width: 120px;
+            box-shadow: 0 2px 8px #0003;
+            transition: background 0.2s;
+        }
+        .social-card img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            display: block;
+        }
+        .social-card:hover {
+            background: #800010;
+        }
+        .main-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            background: var(--bg);
+            padding: 2em 1em;
+        }
+        .center-card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            box-shadow: 0 4px 32px #0007;
+            padding: 2.5em 2em 2em 2em;
+            max-width: 520px;
+            width: 100%;
+            margin-top: 3em;
+        }
+        .center-card h1 {
+            color: var(--primary);
+            font-size: 2.2rem;
+            margin-bottom: 0.5em;
+        }
+        .center-card h2 {
+            color: var(--text);
+            font-size: 1.3rem;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        .center-card p {
+            color: var(--muted);
+            font-size: 1.08rem;
+            margin-bottom: 1.2em;
+            line-height: 1.6;
+        }
+        @media (max-width: 900px) {
+            .main-area {
+                padding: 1em 0.2em;
+            }
+            .center-card {
+                padding: 1.5em 0.7em 1em 0.7em;
+                margin-top: 1.5em;
+            }
+        }
+        @media (max-width: 700px) {
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                z-index: 100;
+            }
+            .main-area {
+                margin-left: var(--sidebar-width);
+            }
+            .sidebar.collapsed + .main-area {
+                margin-left: 0;
+            }
+        }
+        @media (max-width: 600px) {
+            .sidebar {
+                width: 100vw;
+                min-width: 0;
+                max-width: 100vw;
+                position: fixed;
+                height: auto;
+                min-height: 0;
+                z-index: 100;
+            }
+            .sidebar.collapsed {
+                width: 0 !important;
+            }
+            .main-area {
+                margin-left: 0;
+                padding: 0.5em 0.1em;
+            }
+            .center-card {
+                margin-top: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="toggle-btn" id="toggleSidebar" title="Toggle sidebar">&lt;</button>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">Geigi.net</div>
+        <img src="Image (54).jpg" alt="Profile" class="profile-pic" id="profilePic">
+        <nav class="nav">
+            <ul>
+                <li><a href="#" class="active"><span>Home</span></a></li>
+                <li><a href="accounts.html"><span>Buying Accounts</span></a></li>
+                <li><a href="2fa.html"><span>2FA Generator</span></a></li>
+                <li><a href="verify.html"><span>Verification</span></a></li>
+                 <li><a href="https://dcserver.dev/"  target="_blank"><span>Discord Server Setups</span></a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-social">
+            <a class="social-card" href="https://discord.com/users/463953200559685632" target="_blank" rel="noopener noreferrer">
+                <img src="discord.png" alt="Discord">
+                @geigi
+            </a>
+            <a class="social-card" href="https://oguser.com/geigi" target="_blank" rel="noopener noreferrer">
+                <img src="Oguserslogo.png" alt="OGU">
+                /geigi
+            </a>
+        </div>
+    </nav>
+    <main class="main-area" id="mainArea">
+        <div class="center-card">
+            <h1>Welcome to Geigi.net</h1>
+            <h2>Introduction</h2>
+            <p>
+Hi, I’m Geigi – welcome to my personal site!
+I’ve been part of the OG Community for over 4 years, gaining experience, making connections, and contributing to projects I’m passionate about. Thanks for stopping by!
+            </p>
+            <h2>What I'm Currently Buying:</h2>
+            <p>
+                I’m actively buying certain types of accounts. Check the Current Buys section to see what I’m interested in right now (updated regularly.)
+            </p>
+            <h2>Need to Verify Me?</h2>
+            <p>
+                Use the Verify section to confirm my official Discord account, so you can make sure you’re dealing with the real Geigi! You can also use the 2FA Generator to receive TOTP Codes.
+            </p>
+        </div>
+    </main>
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('toggleSidebar');
+        let collapsed = false;
+        toggleBtn.addEventListener('click', function() {
+            collapsed = !collapsed;
+            sidebar.classList.toggle('collapsed', collapsed);
+            toggleBtn.innerHTML = collapsed ? '&gt;' : '&lt;';
+        });
+    </script>
+</body>
+</html>
